@@ -13,10 +13,10 @@ pub enum ZLoopCtlCommand {
 }
 
 // Defaults
-pub static DEFAULT_CAPACITY: i32 = 16384;
-pub static DEFAULT_ZONE_SIZE: i32 = 256;
-pub static DEFAULT_QUEUE_DEPTH: i32 = 128;
-pub static DEFAULT_BASE_DIR: &'static str = "/var/local/zloop";
+static DEFAULT_CAPACITY: i32 = 16384;
+static DEFAULT_ZONE_SIZE: i32 = 256;
+static DEFAULT_QUEUE_DEPTH: i32 = 128;
+static DEFAULT_BASE_DIR: &'static str = "/var/local/zloop";
 
 #[derive(Debug)]
 pub struct ZLoopCtrlContext {
@@ -31,6 +31,24 @@ pub struct ZLoopCtrlContext {
     pub nr_queues: i32,
     pub queue_depth: i32,
     pub buffered: bool
+}
+
+impl ZLoopCtrlContext {
+    pub fn new() -> ZLoopCtrlContext {
+        ZLoopCtrlContext {
+            id: 0,
+            debug: false,
+            command: ZLoopCtlCommand::LIST,
+            capacity: DEFAULT_CAPACITY,
+            zone_size: DEFAULT_ZONE_SIZE,
+            zone_capacity: DEFAULT_ZONE_SIZE,
+            nr_conv: 0,
+            base_dir: DEFAULT_BASE_DIR.to_string(),
+            nr_queues: 1,
+            queue_depth: DEFAULT_QUEUE_DEPTH,
+            buffered: false,
+        }
+    }
 }
 
 static CONTROL_PATH: &'static str = "/dev/zloop-control";

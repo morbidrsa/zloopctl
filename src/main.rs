@@ -34,19 +34,7 @@ fn main() {
 }
 
 fn parse_options() -> ZLoopCtrlContext {
-    let mut ctx: ZLoopCtrlContext = ZLoopCtrlContext {
-        id: 0,
-        debug: false,
-        command: ZLoopCtlCommand::LIST,
-        capacity: zloopctl::DEFAULT_CAPACITY,
-        zone_size: zloopctl::DEFAULT_ZONE_SIZE,
-        zone_capacity: zloopctl::DEFAULT_ZONE_SIZE,
-        nr_conv: 0,
-        base_dir: zloopctl::DEFAULT_BASE_DIR.to_string(),
-        nr_queues: 1,
-        queue_depth: zloopctl::DEFAULT_QUEUE_DEPTH,
-        buffered: false,
-    };
+    let mut ctx = ZLoopCtrlContext::new();
 
     let matches = Command::new("zloopctl")
         .version("0.1")
