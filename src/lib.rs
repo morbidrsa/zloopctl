@@ -12,14 +12,28 @@ pub enum ZLoopCtlCommand {
     DEL,
 }
 
+// Defaults
+pub static DEFAULT_CAPACITY: i32 = 16384;
+pub static DEFAULT_ZONE_SIZE: i32 = 256;
+pub static DEFAULT_QUEUE_DEPTH: i32 = 128;
+pub static DEFAULT_BASE_DIR: &'static str = "/var/local/zloop";
+
 #[derive(Debug)]
 pub struct ZloopCtrlContext {
     pub id: i32,
     pub debug: bool,
     pub command: ZLoopCtlCommand,
+    pub capacity: i32,
+    pub zone_size: i32,
+    pub zone_capacity: i32,
+    pub nr_conv: i32,
+    pub base_dir: String,
+    pub nr_queues: i32,
+    pub queue_depth: i32,
+    pub buffered: bool
 }
 
-pub static CONTROL_PATH: &'static str = "/dev/zloop-control";
+static CONTROL_PATH: &'static str = "/dev/zloop-control";
 
 pub fn list(ctx: &ZloopCtrlContext) {
     let dev = Path::new("/dev/");
@@ -59,8 +73,26 @@ pub fn list(ctx: &ZloopCtrlContext) {
     }
 }
 
-pub fn add(_ctx: &ZloopCtrlContext) {
-    println!("add")
+pub fn add(ctx: &ZloopCtrlContext) -> Result<(), Error>{
+    let mut args: String = String::new();
+
+    args.push_str(&format!("add id={}", ctx.id));
+    args.push_str(&format!(",capacity_mb={}", ctx.capacity));
+    args.push_str(&format!(",zone_size_mb={}", ctx.zone_size));
+    args.push_str(&format!(",zone_capacity_mb={}", ctx.zone_capacity));
+    args.push_str(&format!(",conv_zones={}", ctx.nr_conv));
+    args.push_str(&format!(",base_dir={}", ctx.base_dir));
+    args.push_str(&format!(",nr_queues={}", ctx.nr_queues));
+    args.push_str(&format!(",queue_depth={}", ctx.queue_depth));
+    if ctx.buffered {
+        args.push_str(&format!(",buffered"));
+    }
+
+    if ctx.debug {
+        println!("{args}");
+    }
+
+    write_to_zloop(ctx, args)
 }
 
 pub fn del(ctx: &ZloopCtrlContext) -> Result<(), Error>{
