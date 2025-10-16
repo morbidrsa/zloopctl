@@ -16,6 +16,8 @@ pub enum ZLoopCtlCommand {
 static DEFAULT_CAPACITY: i32 = 16384;
 static DEFAULT_ZONE_SIZE: i32 = 256;
 static DEFAULT_QUEUE_DEPTH: i32 = 128;
+static DEFAULT_NR_QUEUES: i32 = 0;
+static DEFAULT_NR_CONV: i32 = 0;
 static DEFAULT_BASE_DIR: &'static str = "/var/local/zloop";
 
 #[derive(Debug)]
@@ -42,9 +44,9 @@ impl ZLoopCtrlContext {
             capacity: DEFAULT_CAPACITY,
             zone_size: DEFAULT_ZONE_SIZE,
             zone_capacity: DEFAULT_ZONE_SIZE,
-            nr_conv: 0,
+            nr_conv: DEFAULT_NR_CONV,
             base_dir: DEFAULT_BASE_DIR.to_string(),
-            nr_queues: 1,
+            nr_queues: DEFAULT_NR_QUEUES,
             queue_depth: DEFAULT_QUEUE_DEPTH,
             buffered: false,
         }
