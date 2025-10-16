@@ -18,7 +18,12 @@ fn main() {
                 Err(e) => eprintln!("{}", e)
             }
         },
-        ZLoopCtlCommand::LIST => list(&ctx),
+        ZLoopCtlCommand::LIST => {
+            match list(&ctx) {
+                Ok(_) => {},
+                Err(e) => eprintln!("{}", e)
+            }
+        }
         ZLoopCtlCommand::DEL => {
             match del(&ctx) {
                 Ok(_) => {},

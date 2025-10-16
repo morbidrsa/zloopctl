@@ -35,11 +35,11 @@ pub struct ZLoopCtrlContext {
 
 static CONTROL_PATH: &'static str = "/dev/zloop-control";
 
-pub fn list(ctx: &ZLoopCtrlContext) {
+pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     let dev = Path::new("/dev/");
 
-    for entry in read_dir(dev).unwrap() {
-        let entry = entry.unwrap();
+    for entry in read_dir(dev)? {
+        let entry = entry?;
         let path = entry.path();
         let basename = path
             .strip_prefix("/dev/")
@@ -58,7 +58,7 @@ pub fn list(ctx: &ZLoopCtrlContext) {
             continue;
         }
 
-        let stat = fs::stat(&path).unwrap();
+        let stat = fs::stat(&path)?;
         let mode = fs::FileType::from_raw_mode(stat.st_mode);
 
         if !mode.is_block_device() {
@@ -71,6 +71,8 @@ pub fn list(ctx: &ZLoopCtrlContext) {
         println!("{}", basename);
 
     }
+
+    Ok(())
 }
 
 pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
