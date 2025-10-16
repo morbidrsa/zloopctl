@@ -64,17 +64,13 @@ pub fn add(_ctx: &ZloopCtrlContext) {
 }
 
 pub fn del(ctx: &ZloopCtrlContext) -> Result<(), Error>{
-    let path = Path::new(CONTROL_PATH);
     let args: String = String::from(format!("remove id={}", ctx.id));
-
-    let mut ctrl = File::options().write(true).open(path)?;
 
     if ctx.debug {
         println!("args: {}", args);
     }
 
-    ctrl.write(args.as_bytes())?;
-    Ok(())
+    write_to_zloop(ctx, args)
 }
 
 
@@ -98,4 +94,18 @@ pub fn check_zloop_driver(
     }
 
     Ok(mode.is_char_device())
+}
+
+fn write_to_zloop(ctx: &ZloopCtrlContext, args: String) -> Result<(), Error>
+{
+    let path = Path::new(CONTROL_PATH);
+    let mut ctrl = File::options().write(true).open(path)?;
+
+    if ctx.debug {
+        println!("args: {}", args);
+    }
+
+    ctrl.write(args.as_bytes())?;
+
+    Ok(())
 }
