@@ -1,6 +1,8 @@
 use rustix::fs;
-use std::fs::read_dir;
+use std::fs::{read_dir, File};
+use std::io::Write;
 use std::path::Path;
+use std::io::Error;
 
 #[derive(PartialEq)]
 #[derive(Debug)]
@@ -12,6 +14,7 @@ pub enum ZLoopCtlCommand {
 
 #[derive(Debug)]
 pub struct ZloopCtrlContext {
+    pub id: i32,
     pub debug: bool,
     pub command: ZLoopCtlCommand,
 }
@@ -60,8 +63,18 @@ pub fn add(_ctx: &ZloopCtrlContext) {
     println!("add")
 }
 
-pub fn del(_ctx: &ZloopCtrlContext) {
-    println!("del")
+pub fn del(ctx: &ZloopCtrlContext) -> Result<(), Error>{
+    let path = Path::new(CONTROL_PATH);
+    let args: String = String::from(format!("remove id={}", ctx.id));
+
+    let mut ctrl = File::options().write(true).open(path)?;
+
+    if ctx.debug {
+        println!("args: {}", args);
+    }
+
+    ctrl.write(args.as_bytes())?;
+    Ok(())
 }
 
 

@@ -1,6 +1,6 @@
 use std::process;
 
-use clap::{Arg, ArgAction, Command};
+use clap::{Arg, ArgAction, Command, value_parser};
 use zloopctl::*;
 
 fn main() {
@@ -14,12 +14,18 @@ fn main() {
     match ctx.command {
         ZLoopCtlCommand::ADD => add(&ctx),
         ZLoopCtlCommand::LIST => list(&ctx),
-        ZLoopCtlCommand::DEL => del(&ctx),
+        ZLoopCtlCommand::DEL => {
+            match del(&ctx) {
+                Ok(_) => {},
+                Err(e) => eprintln!("{}", e)
+            }
+        }
     }
 }
 
 fn parse_options() -> ZloopCtrlContext {
     let mut ctx: ZloopCtrlContext = ZloopCtrlContext {
+        id: 0,
         debug: false,
         command: ZLoopCtlCommand::LIST
     };
@@ -45,6 +51,15 @@ fn parse_options() -> ZloopCtrlContext {
         .subcommand(
             Command::new("del")
                 .about("delete zloop device")
+                .arg(
+                    Arg::new("ID")
+                        .short('i')
+                        .long("id")
+                        .help("The ID of the zloop device to delete")
+                        .action(ArgAction::Set)
+                        .required(true)
+                        .value_parser(value_parser!(i32))
+                )
         )
         .get_matches();
 
@@ -54,8 +69,9 @@ fn parse_options() -> ZloopCtrlContext {
         ctx.command = ZLoopCtlCommand::LIST;
     } else if let Some(_cmd) = matches.subcommand_matches("add") {
         ctx.command = ZLoopCtlCommand::ADD;
-    } else if let Some(_cmd) = matches.subcommand_matches("del") {
+    } else if let Some(cmd) = matches.subcommand_matches("del") {
         ctx.command = ZLoopCtlCommand::DEL;
+        ctx.id = *cmd.get_one::<i32>("ID").expect("ID not found");
     }
 
     if ctx.debug {
