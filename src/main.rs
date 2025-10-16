@@ -1,13 +1,15 @@
+use std::process;
+
 use clap::{Arg, ArgAction, Command};
 use zloopctl::*;
 
 fn main() {
     let ctx = parse_options();
 
-    if !check_zloop_driver(&ctx) {
-        println!("{} not found, is the module loaded?", CONTROL_PATH);
-        return
-    }
+    check_zloop_driver(&ctx).unwrap_or_else(|err| {
+        eprintln!("zloop driver not found {err}");
+        process::exit(1);
+    });
 
     match ctx.command {
         ZLoopCtlCommand::ADD => add(&ctx),

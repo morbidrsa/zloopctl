@@ -1,7 +1,6 @@
 use rustix::fs;
 use std::fs::read_dir;
 use std::path::Path;
-use std::process;
 
 #[derive(PartialEq)]
 #[derive(Debug)]
@@ -66,15 +65,14 @@ pub fn del(_ctx: &ZloopCtrlContext) {
 }
 
 
-pub fn check_zloop_driver(ctx: &ZloopCtrlContext) -> bool {
+pub fn check_zloop_driver(
+    ctx: &ZloopCtrlContext
+) -> Result<bool, &'static str> {
     if ctx.debug {
         println!("Checking {}", CONTROL_PATH);
     }
 
-    let stat = fs::stat(CONTROL_PATH).unwrap_or_else(|e| {
-        println!("stat({}) failed: {}", CONTROL_PATH, e);
-        process::exit(1)
-    });
+    let stat = fs::stat(CONTROL_PATH).expect("stat failed");
 
     if ctx.debug {
         println!("stat.st_mode: 0x{:08x}", stat.st_mode);
@@ -82,5 +80,9 @@ pub fn check_zloop_driver(ctx: &ZloopCtrlContext) -> bool {
 
     let mode = fs::FileType::from_raw_mode(stat.st_mode);
 
-    mode.is_char_device()
+    if !mode.is_char_device() {
+        return Err("not a character device")
+    }
+
+    Ok(mode.is_char_device())
 }
