@@ -1,5 +1,5 @@
 # zloopctl - Control zloop devices
-
+[![Rust](https://github.com/morbidrsa/zloopctl/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/morbidrsa/zloopctl/actions/workflows/rust.yml)
 ## Why zloopctl
 While the zloop driver has a very simple interface that can even be used by
 shell scripts I found that some users might have different needs like e.g.:
