@@ -19,7 +19,7 @@ pub static DEFAULT_QUEUE_DEPTH: i32 = 128;
 pub static DEFAULT_BASE_DIR: &'static str = "/var/local/zloop";
 
 #[derive(Debug)]
-pub struct ZloopCtrlContext {
+pub struct ZLoopCtrlContext {
     pub id: i32,
     pub debug: bool,
     pub command: ZLoopCtlCommand,
@@ -35,7 +35,7 @@ pub struct ZloopCtrlContext {
 
 static CONTROL_PATH: &'static str = "/dev/zloop-control";
 
-pub fn list(ctx: &ZloopCtrlContext) {
+pub fn list(ctx: &ZLoopCtrlContext) {
     let dev = Path::new("/dev/");
 
     for entry in read_dir(dev).unwrap() {
@@ -73,7 +73,7 @@ pub fn list(ctx: &ZloopCtrlContext) {
     }
 }
 
-pub fn add(ctx: &ZloopCtrlContext) -> Result<(), Error>{
+pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     let mut args: String = String::new();
 
     args.push_str(&format!("add id={}", ctx.id));
@@ -95,7 +95,7 @@ pub fn add(ctx: &ZloopCtrlContext) -> Result<(), Error>{
     write_to_zloop(ctx, args)
 }
 
-pub fn del(ctx: &ZloopCtrlContext) -> Result<(), Error>{
+pub fn del(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     let args: String = String::from(format!("remove id={}", ctx.id));
 
     if ctx.debug {
@@ -107,7 +107,7 @@ pub fn del(ctx: &ZloopCtrlContext) -> Result<(), Error>{
 
 
 pub fn check_zloop_driver(
-    ctx: &ZloopCtrlContext
+    ctx: &ZLoopCtrlContext
 ) -> Result<bool, &'static str> {
     if ctx.debug {
         println!("Checking {}", CONTROL_PATH);
@@ -128,7 +128,7 @@ pub fn check_zloop_driver(
     Ok(mode.is_char_device())
 }
 
-fn write_to_zloop(ctx: &ZloopCtrlContext, args: String) -> Result<(), Error>
+fn write_to_zloop(ctx: &ZLoopCtrlContext, args: String) -> Result<(), Error>
 {
     let path = Path::new(CONTROL_PATH);
     let mut ctrl = File::options().write(true).open(path)?;

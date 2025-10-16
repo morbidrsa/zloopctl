@@ -28,8 +28,8 @@ fn main() {
     }
 }
 
-fn parse_options() -> ZloopCtrlContext {
-    let mut ctx: ZloopCtrlContext = ZloopCtrlContext {
+fn parse_options() -> ZLoopCtrlContext {
+    let mut ctx: ZLoopCtrlContext = ZLoopCtrlContext {
         id: 0,
         debug: false,
         command: ZLoopCtlCommand::LIST,
@@ -175,7 +175,7 @@ fn parse_options() -> ZloopCtrlContext {
     ctx
 }
 
-fn parse_add_options(ctx: &mut ZloopCtrlContext, cmd: &ArgMatches)
+fn parse_add_options(ctx: &mut ZLoopCtrlContext, cmd: &ArgMatches)
 {
 
     ctx.id = *cmd.get_one::<i32>("ID").expect("ID not found");
