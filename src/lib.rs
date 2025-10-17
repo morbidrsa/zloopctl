@@ -64,9 +64,8 @@ fn check_zloop_path(ctx: &ZLoopCtrlContext) -> bool
 }
 
 pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
-    let dev = Path::new("/dev/");
 
-    for entry in read_dir(dev)? {
+    for entry in read_dir(Path::new("/dev/"))? {
         let entry = entry?;
         let path = entry.path();
         let basename = path
