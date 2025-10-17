@@ -55,6 +55,14 @@ impl ZLoopCtrlContext {
 
 static CONTROL_PATH: &str = "/dev/zloop-control";
 
+fn check_zloop_path(ctx: &ZLoopCtrlContext) -> bool
+{
+    let p = format!("{0}/{1}", ctx.base_dir, ctx.id);
+    let path = Path::new(&p);
+
+    path.exists()
+}
+
 pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     let dev = Path::new("/dev/");
 
@@ -97,6 +105,12 @@ pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
 
 pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     let mut args: String = String::new();
+
+    if !check_zloop_path(ctx) {
+        return Err(Error::new(std::io::ErrorKind::NotFound,
+                              format!("zloop path {}/{} does not exist",
+                              ctx.base_dir, ctx.id)))
+    }
 
     args.push_str(&format!("add id={}", ctx.id));
 
