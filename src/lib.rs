@@ -18,7 +18,7 @@ static DEFAULT_ZONE_SIZE: i32 = 256;
 static DEFAULT_QUEUE_DEPTH: i32 = 128;
 static DEFAULT_NR_QUEUES: i32 = 0;
 static DEFAULT_NR_CONV: i32 = 0;
-static DEFAULT_BASE_DIR: &'static str = "/var/local/zloop";
+static DEFAULT_BASE_DIR: &str = "/var/local/zloop";
 
 #[derive(Debug)]
 pub struct ZLoopCtrlContext {
@@ -53,7 +53,7 @@ impl ZLoopCtrlContext {
     }
 }
 
-static CONTROL_PATH: &'static str = "/dev/zloop-control";
+static CONTROL_PATH: &str = "/dev/zloop-control";
 
 pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     let dev = Path::new("/dev/");
@@ -129,7 +129,7 @@ pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     }
 
     if ctx.buffered {
-        args.push_str(&format!(",buffered"));
+        args.push_str(",buffered");
     }
 
     if ctx.debug {
@@ -140,7 +140,7 @@ pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
 }
 
 pub fn del(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
-    let args: String = String::from(format!("remove id={}", ctx.id));
+    let args: String = format!("remove id={}", ctx.id);
 
     if ctx.debug {
         println!("args: {}", args);
@@ -181,7 +181,7 @@ fn write_to_zloop(ctx: &ZLoopCtrlContext, args: String) -> Result<(), Error>
         println!("args: {}", args);
     }
 
-    ctrl.write(args.as_bytes())?;
+    let _ = ctrl.write(args.as_bytes())?;
 
     Ok(())
 }
