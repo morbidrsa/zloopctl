@@ -63,7 +63,8 @@ fn check_zloop_path(ctx: &ZLoopCtrlContext) -> bool
     path.exists()
 }
 
-pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
+fn collect_devs(ctx: &ZLoopCtrlContext) -> Result<Vec<String>, Error> {
+
     let mut devs = Vec::new();
 
     for entry in read_dir(Path::new("/dev/"))? {
@@ -98,6 +99,12 @@ pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
 
         devs.push(String::from(basename));
     }
+
+    Ok(devs)
+}
+
+pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
+    let devs = collect_devs(ctx)?;
 
     devs.iter().for_each(|d| println!("{}", d));
 
