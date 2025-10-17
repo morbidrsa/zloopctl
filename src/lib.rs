@@ -64,6 +64,7 @@ fn check_zloop_path(ctx: &ZLoopCtrlContext) -> bool
 }
 
 pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
+    let mut devs = Vec::new();
 
     for entry in read_dir(Path::new("/dev/"))? {
         let entry = entry?;
@@ -95,9 +96,10 @@ pub fn list(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
             continue;
         }
 
-        println!("{}", basename);
-
+        devs.push(String::from(basename));
     }
+
+    devs.iter().for_each(|d| println!("{}", d));
 
     Ok(())
 }
