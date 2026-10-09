@@ -3,6 +3,31 @@ use std::process;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use zloopctl::*;
 
+fn find_next_free_id(ctx: &ZLoopCtrlContext) -> i32 {
+    // Start from 0 and look for the first unused ID
+    let mut id = 0;
+    loop {
+        let test_ctx = ZLoopCtrlContext {
+            id,
+            debug: ctx.debug,
+            command: ctx.command.clone(),
+            capacity: ctx.capacity,
+            zone_size: ctx.zone_size,
+            zone_capacity: ctx.zone_capacity,
+            nr_conv: ctx.nr_conv,
+            base_dir: ctx.base_dir.clone(),
+            nr_queues: ctx.nr_queues,
+            queue_depth: ctx.queue_depth,
+            buffered: ctx.buffered
+        };
+
+        if !check_zloop_path(&test_ctx) {
+            return id;
+        }
+        id += 1;
+    }
+}
+
 fn main() {
     let ctx = parse_options();
 
@@ -57,9 +82,9 @@ fn parse_options() -> ZLoopCtrlContext {
                     Arg::new("ID")
                         .short('i')
                         .long("id")
-                        .help("The ID of the zloop device to add")
+                        .help("The ID of the zloop device to add (auto-assigned if not provided)")
                         .action(ArgAction::Set)
-                        .required(true)
+                        .required(false)
                         .value_parser(value_parser!(i32))
                 )
                 .arg(
@@ -170,8 +195,12 @@ fn parse_options() -> ZLoopCtrlContext {
 
 fn parse_add_options(ctx: &mut ZLoopCtrlContext, cmd: &ArgMatches)
 {
-
-    ctx.id = *cmd.get_one::<i32>("ID").expect("ID not found");
+    // Check if ID was provided; if not, assign the next free ID
+    if let Some(id) = cmd.get_one::<i32>("ID") {
+        ctx.id = *id;
+    } else {
+        ctx.id = find_next_free_id(ctx);
+    }
 
     if cmd.contains_id("capacity") {
         ctx.capacity = *cmd.get_one::<i32>("capacity")

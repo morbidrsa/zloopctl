@@ -12,6 +12,16 @@ pub enum ZLoopCtlCommand {
     DEL,
 }
 
+impl Clone for ZLoopCtlCommand {
+    fn clone(&self) -> Self {
+        match self {
+            ZLoopCtlCommand::LIST => ZLoopCtlCommand::LIST,
+            ZLoopCtlCommand::ADD => ZLoopCtlCommand::ADD,
+            ZLoopCtlCommand::DEL => ZLoopCtlCommand::DEL,
+        }
+    }
+}
+
 // Defaults
 static DEFAULT_CAPACITY: i32 = 16384;
 static DEFAULT_ZONE_SIZE: i32 = 256;
@@ -55,7 +65,7 @@ impl ZLoopCtrlContext {
 
 static CONTROL_PATH: &str = "/dev/zloop-control";
 
-fn check_zloop_path(ctx: &ZLoopCtrlContext) -> bool
+pub fn check_zloop_path(ctx: &ZLoopCtrlContext) -> bool
 {
     let p = format!("{0}/{1}", ctx.base_dir, ctx.id);
     let path = Path::new(&p);
