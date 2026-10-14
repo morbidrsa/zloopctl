@@ -3,6 +3,7 @@ use std::fs::{read_dir, File, DirEntry};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::io::Error;
+use std::process::Command;
 
 #[derive(PartialEq)]
 #[derive(Debug)]
@@ -42,7 +43,8 @@ pub struct ZLoopCtrlContext {
     pub base_dir: String,
     pub nr_queues: i32,
     pub queue_depth: i32,
-    pub buffered: bool
+    pub buffered: bool,
+    pub create_dir: bool
 }
 
 impl ZLoopCtrlContext {
@@ -59,6 +61,7 @@ impl ZLoopCtrlContext {
             nr_queues: DEFAULT_NR_QUEUES,
             queue_depth: DEFAULT_QUEUE_DEPTH,
             buffered: false,
+            create_dir: false,
         }
     }
 }
@@ -136,9 +139,15 @@ pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     let mut args: String = String::new();
 
     if !check_zloop_path(ctx) {
-        return Err(Error::new(std::io::ErrorKind::NotFound,
-                              format!("zloop path {}/{} does not exist",
-                              ctx.base_dir, ctx.id)))
+        if ctx.create_dir {
+            let path = format!("{}/{}", ctx.base_dir, ctx.id);
+            std::fs::create_dir_all(&path)?;
+            set_nocow_attribute(&path, ctx);
+        } else {
+            return Err(Error::new(std::io::ErrorKind::NotFound,
+                                  format!("zloop path {}/{} does not exist",
+                                  ctx.base_dir, ctx.id)))
+        }
     }
 
     args.push_str(&format!("add id={}", ctx.id));
@@ -227,4 +236,29 @@ fn write_to_zloop(ctx: &ZLoopCtrlContext, args: String) -> Result<(), Error>
     let _ = ctrl.write(args.as_bytes())?;
 
     Ok(())
+}
+
+fn set_nocow_attribute(path: &str, ctx: &ZLoopCtrlContext) {
+    let output = Command::new("chattr")
+        .arg("+C")
+        .arg(path)
+        .output();
+
+    match output {
+        Ok(result) => {
+            if !result.status.success() {
+                if ctx.debug {
+                    let error_msg = String::from_utf8_lossy(&result.stderr);
+                    println!("Failed to set nocow attribute: {}", error_msg);
+                }
+            } else if ctx.debug {
+                println!("Set nocow attribute on {}", path);
+            }
+        }
+        Err(e) => {
+            if ctx.debug {
+                println!("chattr not available: {}", e);
+            }
+        }
+    }
 }

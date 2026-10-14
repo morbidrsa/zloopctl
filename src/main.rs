@@ -7,19 +7,20 @@ fn find_next_free_id(ctx: &ZLoopCtrlContext) -> i32 {
     // Start from 0 and look for the first unused ID
     let mut id = 0;
     loop {
-        let test_ctx = ZLoopCtrlContext {
-            id,
-            debug: ctx.debug,
-            command: ctx.command.clone(),
-            capacity: ctx.capacity,
-            zone_size: ctx.zone_size,
-            zone_capacity: ctx.zone_capacity,
-            nr_conv: ctx.nr_conv,
-            base_dir: ctx.base_dir.clone(),
-            nr_queues: ctx.nr_queues,
-            queue_depth: ctx.queue_depth,
-            buffered: ctx.buffered
-        };
+         let test_ctx = ZLoopCtrlContext {
+             id,
+             debug: ctx.debug,
+             command: ctx.command.clone(),
+             capacity: ctx.capacity,
+             zone_size: ctx.zone_size,
+             zone_capacity: ctx.zone_capacity,
+             nr_conv: ctx.nr_conv,
+             base_dir: ctx.base_dir.clone(),
+             nr_queues: ctx.nr_queues,
+             queue_depth: ctx.queue_depth,
+             buffered: ctx.buffered,
+             create_dir: ctx.create_dir
+         };
 
         if !check_zloop_path(&test_ctx) {
             return id;
@@ -133,6 +134,13 @@ fn parse_options() -> ZLoopCtrlContext {
                         .value_parser(value_parser!(String))
                 )
                 .arg(
+                    Arg::new("create")
+                        .short('c')
+                        .long("create")
+                        .help("create the device directory if it doesn't exist")
+                        .action(ArgAction::SetTrue)
+                )
+                .arg(
                     Arg::new("nr queues")
                         .short('q')
                         .long("nr-queues")
@@ -241,5 +249,7 @@ fn parse_add_options(ctx: &mut ZLoopCtrlContext, cmd: &ArgMatches)
     if cmd.contains_id("Buffered I/O") {
         ctx.buffered = cmd.get_flag("Buffered I/O");
     }
+
+    ctx.create_dir = cmd.get_flag("create");
 
 }
