@@ -3,13 +3,14 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::io::Error;
-use std::process::Command;
 
 mod del;
 mod list;
+mod add;
 
 pub use del::del;
 pub use list::list;
+pub use add::add;
 
 #[derive(PartialEq)]
 #[derive(Debug)]
@@ -30,12 +31,12 @@ impl Clone for ZLoopCtlCommand {
 }
 
 // Defaults
-static DEFAULT_CAPACITY: i32 = 16384;
-static DEFAULT_ZONE_SIZE: i32 = 256;
-static DEFAULT_QUEUE_DEPTH: i32 = 128;
-static DEFAULT_NR_QUEUES: i32 = 0;
-static DEFAULT_NR_CONV: i32 = 0;
-static DEFAULT_BASE_DIR: &str = "/var/local/zloop";
+pub static DEFAULT_CAPACITY: i32 = 16384;
+pub static DEFAULT_ZONE_SIZE: i32 = 256;
+pub static DEFAULT_QUEUE_DEPTH: i32 = 128;
+pub static DEFAULT_NR_QUEUES: i32 = 0;
+pub static DEFAULT_NR_CONV: i32 = 0;
+pub static DEFAULT_BASE_DIR: &str = "/var/local/zloop";
 
 #[derive(Debug)]
 pub struct ZLoopCtrlContext {
@@ -82,62 +83,6 @@ pub fn check_zloop_path(ctx: &ZLoopCtrlContext) -> bool
     path.exists()
 }
 
-pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
-    let mut args: String = String::new();
-
-    if !check_zloop_path(ctx) {
-        if ctx.create_dir {
-            let path = format!("{}/{}", ctx.base_dir, ctx.id);
-            std::fs::create_dir_all(&path)?;
-            set_nocow_attribute(&path, ctx);
-        } else {
-            return Err(Error::new(std::io::ErrorKind::NotFound,
-                                  format!("zloop path {}/{} does not exist",
-                                  ctx.base_dir, ctx.id)))
-        }
-    }
-
-    args.push_str(&format!("add id={}", ctx.id));
-
-    if ctx.capacity != DEFAULT_CAPACITY {
-        args.push_str(&format!(",capacity_mb={}", ctx.capacity));
-    }
-
-    if ctx.zone_size != DEFAULT_ZONE_SIZE {
-        args.push_str(&format!(",zone_size_mb={}", ctx.zone_size));
-    }
-
-    if ctx.zone_capacity != DEFAULT_ZONE_SIZE {
-        args.push_str(&format!(",zone_capacity_mb={}", ctx.zone_capacity));
-    }
-
-    if ctx.nr_conv != DEFAULT_NR_CONV {
-        args.push_str(&format!(",conv_zones={}", ctx.nr_conv));
-    }
-
-    if ctx.base_dir != DEFAULT_BASE_DIR {
-        args.push_str(&format!(",base_dir={}", ctx.base_dir));
-    }
-
-    if ctx.nr_queues != DEFAULT_NR_QUEUES {
-        args.push_str(&format!(",nr_queues={}", ctx.nr_queues));
-    }
-
-    if ctx.queue_depth != DEFAULT_QUEUE_DEPTH {
-        args.push_str(&format!(",queue_depth={}", ctx.queue_depth));
-    }
-
-    if ctx.buffered {
-        args.push_str(",buffered");
-    }
-
-    if ctx.debug {
-        println!("{args}");
-    }
-
-    write_to_zloop(ctx, args)
-}
-
 pub fn check_zloop_driver(
     ctx: &ZLoopCtrlContext
 ) -> Result<bool, &'static str> {
@@ -172,29 +117,4 @@ pub fn write_to_zloop(ctx: &ZLoopCtrlContext, args: String) -> Result<(), Error>
     let _ = ctrl.write(args.as_bytes())?;
 
     Ok(())
-}
-
-fn set_nocow_attribute(path: &str, ctx: &ZLoopCtrlContext) {
-    let output = Command::new("chattr")
-        .arg("+C")
-        .arg(path)
-        .output();
-
-    match output {
-        Ok(result) => {
-            if !result.status.success() {
-                if ctx.debug {
-                    let error_msg = String::from_utf8_lossy(&result.stderr);
-                    println!("Failed to set nocow attribute: {}", error_msg);
-                }
-            } else if ctx.debug {
-                println!("Set nocow attribute on {}", path);
-            }
-        }
-        Err(e) => {
-            if ctx.debug {
-                println!("chattr not available: {}", e);
-            }
-        }
-    }
 }
