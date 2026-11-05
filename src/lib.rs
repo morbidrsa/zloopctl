@@ -224,7 +224,7 @@ pub fn check_zloop_driver(
     Ok(mode.is_char_device())
 }
 
-fn write_to_zloop(ctx: &ZLoopCtrlContext, args: String) -> Result<(), Error>
+pub fn write_to_zloop(ctx: &ZLoopCtrlContext, args: String) -> Result<(), Error>
 {
     let path = Path::new(CONTROL_PATH);
     let mut ctrl = File::options().write(true).open(path)?;
