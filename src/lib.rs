@@ -5,6 +5,10 @@ use std::path::{Path, PathBuf};
 use std::io::Error;
 use std::process::Command;
 
+mod del;
+
+pub use del::del;
+
 #[derive(PartialEq)]
 #[derive(Debug)]
 pub enum ZLoopCtlCommand {
@@ -190,17 +194,6 @@ pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
 
     write_to_zloop(ctx, args)
 }
-
-pub fn del(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
-    let args: String = format!("remove id={}", ctx.id);
-
-    if ctx.debug {
-        println!("args: {}", args);
-    }
-
-    write_to_zloop(ctx, args)
-}
-
 
 pub fn check_zloop_driver(
     ctx: &ZLoopCtrlContext
