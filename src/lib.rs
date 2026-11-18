@@ -1,4 +1,5 @@
 use rustix::fs;
+use rustix::io::Errno;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -200,12 +201,17 @@ pub fn check_zloop_path(ctx: &ZLoopCtrlContext) -> bool
 
 pub fn check_zloop_driver(
     ctx: &ZLoopCtrlContext
-) -> Result<bool, &'static str> {
+) -> Result<bool, String> {
     if ctx.debug {
         println!("Checking {}", CONTROL_PATH);
     }
 
-    let stat = fs::stat(CONTROL_PATH).expect("stat failed");
+    let stat = match fs::stat(CONTROL_PATH) {
+        Ok(stat) => stat,
+        Err(Errno::NOENT) =>
+            return Err("zloop kernel driver not loaded".to_string()),
+        Err(e) => return Err(format!("stat of {CONTROL_PATH} failed: {e}").to_string()),
+    };
 
     if ctx.debug {
         println!("stat.st_mode: 0x{:08x}", stat.st_mode);
@@ -214,7 +220,7 @@ pub fn check_zloop_driver(
     let mode = fs::FileType::from_raw_mode(stat.st_mode);
 
     if !mode.is_char_device() {
-        return Err("not a character device")
+        return Err("not a character device".to_string())
     }
 
     Ok(mode.is_char_device())
