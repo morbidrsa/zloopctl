@@ -4,12 +4,6 @@ use std::process::Command;
 use crate::ZLoopCtrlContext;
 use crate::write_to_zloop;
 use crate::check_zloop_path;
-use crate::DEFAULT_CAPACITY;
-use crate::DEFAULT_ZONE_SIZE;
-use crate::DEFAULT_QUEUE_DEPTH;
-use crate::DEFAULT_NR_CONV;
-use crate::DEFAULT_BASE_DIR;
-use crate::DEFAULT_NR_QUEUES;
 
 fn set_nocow_attribute(path: &str, ctx: &ZLoopCtrlContext) {
     let output = Command::new("chattr")
@@ -52,34 +46,13 @@ pub fn add(ctx: &ZLoopCtrlContext) -> Result<(), Error>{
     }
 
     args.push_str(&format!("add id={}", ctx.id));
-
-    if ctx.capacity != DEFAULT_CAPACITY {
-        args.push_str(&format!(",capacity_mb={}", ctx.capacity));
-    }
-
-    if ctx.zone_size != DEFAULT_ZONE_SIZE {
-        args.push_str(&format!(",zone_size_mb={}", ctx.zone_size));
-    }
-
-    if ctx.zone_capacity != DEFAULT_ZONE_SIZE {
-        args.push_str(&format!(",zone_capacity_mb={}", ctx.zone_capacity));
-    }
-
-    if ctx.nr_conv != DEFAULT_NR_CONV {
-        args.push_str(&format!(",conv_zones={}", ctx.nr_conv));
-    }
-
-    if ctx.base_dir != DEFAULT_BASE_DIR {
-        args.push_str(&format!(",base_dir={}", ctx.base_dir));
-    }
-
-    if ctx.nr_queues != DEFAULT_NR_QUEUES {
-        args.push_str(&format!(",nr_queues={}", ctx.nr_queues));
-    }
-
-    if ctx.queue_depth != DEFAULT_QUEUE_DEPTH {
-        args.push_str(&format!(",queue_depth={}", ctx.queue_depth));
-    }
+    args.push_str(&format!(",capacity_mb={}", ctx.capacity));
+    args.push_str(&format!(",zone_size_mb={}", ctx.zone_size));
+    args.push_str(&format!(",zone_capacity_mb={}", ctx.zone_capacity));
+    args.push_str(&format!(",conv_zones={}", ctx.nr_conv));
+    args.push_str(&format!(",base_dir={}", ctx.base_dir));
+    args.push_str(&format!(",nr_queues={}", ctx.nr_queues));
+    args.push_str(&format!(",queue_depth={}", ctx.queue_depth));
 
     if ctx.buffered {
         args.push_str(",buffered");
