@@ -113,7 +113,7 @@ pub struct ZLoopCtrlContext {
 
 impl ZLoopCtrlContext {
 
-    pub fn from_args() -> Result<Self, &'static str> {
+    pub fn from_args() -> ZLoopCtrlContext {
         let args = Args::parse();
 
         let mut ctx = ZLoopCtrlContext {
@@ -157,8 +157,7 @@ impl ZLoopCtrlContext {
             println!("{:?}", ctx)
         }
 
-        Ok(ctx)
-
+        ctx
     }
 }
 
